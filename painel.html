@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Santo Frango — Painel da Loja</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --preto:#15110D;--sup:#1E1812;--sup2:#2A2117;--borda:#3A2D1D;
+  --dourado:#E8A33D;--dourado-claro:#F4C570;--brasa:#C8492A;
+  --creme:#F7EFE1;--creme-fraco:#BFB09A;--verde:#7A9A52;--azul:#3A7BD5;
+  --raio:14px;
+  --fc:'Work Sans',-apple-system,sans-serif;
+  --fm:'JetBrains Mono','Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--preto);color:var(--creme);font-family:var(--fc);-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
+header{background:var(--sup);border-bottom:1.5px solid var(--borda);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:40;}
+.header-esq{display:flex;align-items:center;gap:10px;}
+header h1{font-size:17px;font-weight:800;color:var(--dourado);}
+.badge-novo{background:var(--brasa);color:#fff;border-radius:999px;font-size:11px;font-weight:800;padding:2px 9px;display:none;}
+.badge-novo.mostrar{display:inline;}
+.header-dir{display:flex;align-items:center;gap:8px;}
+.btn-som{background:none;border:1.5px solid var(--borda);color:var(--creme-fraco);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fc);}
+.btn-som.ativo{border-color:var(--verde);color:var(--verde);}
+.btn-limpar{background:none;border:1.5px solid rgba(200,73,42,.4);color:var(--brasa);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fc);}
+.btn-limpar:hover{background:rgba(200,73,42,.1);}
+
+/* ABAS */
+.abas{display:flex;gap:0;background:var(--sup);border-bottom:1.5px solid var(--borda);overflow-x:auto;}
+.aba{padding:10px 16px;font-weight:700;font-size:13px;color:var(--creme-fraco);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--fc);}
+.aba.ativa{color:var(--dourado);border-bottom-color:var(--dourado);}
+
+/* CONTEÚDO */
+.conteudo-aba{display:none;padding:14px;}
+.conteudo-aba.ativo{display:block;}
+.lista-pedidos{display:flex;flex-direction:column;gap:12px;max-width:720px;margin:0 auto;}
+
+/* CARD */
+.card{background:var(--sup);border:1.5px solid var(--borda);border-radius:var(--raio);overflow:hidden;}
+.card.novo{border-color:var(--brasa);animation:pulsar 1.5s ease-in-out 3;}
+@keyframes pulsar{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 5px rgba(200,73,42,.2);}}
+
+.card-topo{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--borda);}
+.num{font-family:var(--fm);font-size:13px;font-weight:700;color:var(--dourado);}
+.tag{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.5px;}
+.tag-novo{background:rgba(200,73,42,.2);color:#E8856A;}
+.tag-preparo{background:rgba(232,163,61,.2);color:var(--dourado-claro);}
+.tag-entrega{background:rgba(58,123,213,.2);color:#7AABF0;}
+.tag-concluido{background:rgba(122,154,82,.2);color:#A5C97A;}
+.hora{font-size:11px;color:var(--creme-fraco);margin-left:auto;}
+
+.card-corpo{padding:12px 14px;font-size:13px;line-height:1.7;}
+.linha-info{display:flex;gap:6px;align-items:baseline;}
+.info-label{color:var(--creme-fraco);font-size:12px;min-width:82px;flex:none;}
+.info-val{color:var(--creme);font-weight:600;}
+.info-val.destaque{color:var(--dourado-claro);font-family:var(--fm);font-size:15px;font-weight:700;}
+.info-val.gratis{color:var(--verde);}
+.taxa-riscada{text-decoration:line-through;color:var(--creme-fraco);font-size:12px;font-family:var(--fm);}
+
+.card-rodape{padding:10px 14px;border-top:1px solid var(--borda);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{padding:8px 16px;border-radius:999px;border:none;font-family:var(--fc);font-weight:700;font-size:13px;cursor:pointer;}
+.btn-print{background:var(--sup2);color:var(--creme);border:1.5px solid var(--borda);}
+.btn-print:hover{border-color:var(--dourado);}
+.btn-avancar{background:var(--dourado);color:var(--preto);}
+.btn-concluir{background:var(--verde);color:#fff;}
+.btn-apagar{background:none;color:var(--brasa);border:1.5px solid rgba(200,73,42,.35);margin-left:auto;}
+.btn-apagar:hover{background:rgba(200,73,42,.1);}
+
+/* VAZIO */
+.vazio{text-align:center;padding:48px 20px;color:var(--creme-fraco);font-size:14px;}
+
+/* MODAL CONFIRMAÇÃO */
+.modal-bg{position:fixed;inset:0;background:rgba(10,8,6,.88);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;}
+.modal-bg.aberto{display:flex;}
+.modal{background:var(--sup);border:1.5px solid var(--borda);border-radius:var(--raio);max-width:360px;width:100%;padding:28px 24px;}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:8px;color:var(--creme);}
+.modal p{font-size:13.5px;color:var(--creme-fraco);margin-bottom:22px;line-height:1.5;}
+.modal-btns{display:flex;gap:10px;}
+.btn-cancelar-modal{flex:1;background:var(--sup2);border:1.5px solid var(--borda);color:var(--creme);border-radius:999px;padding:12px;font-family:var(--fc);font-weight:700;font-size:14px;cursor:pointer;}
+.btn-confirmar-apagar{flex:1;background:var(--brasa);border:none;color:#fff;border-radius:999px;padding:12px;font-family:var(--fc);font-weight:700;font-size:14px;cursor:pointer;}
+
+/* IMPRESSÃO */
+@media print{
+  body > *{display:none !important;}
+  #areaImpressao{display:block !important;position:static !important;}
+}
+#areaImpressao{display:none;position:absolute;left:-9999px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-esq">
+    <h1>🍗 Santo Frango</h1>
+    <span class="badge-novo" id="badgeNovo">0 novo(s)</span>
+  </div>
+  <div class="header-dir">
+    <button class="btn-som" id="btnSom">🔔 Som: OFF</button>
+    <button class="btn-limpar" id="btnLimparHistorico">🗑 Limpar histórico</button>
+  </div>
+</header>
+
+<div class="abas">
+  <button class="aba ativa" data-aba="novos">Novos</button>
+  <button class="aba" data-aba="preparo">Em preparo</button>
+  <button class="aba" data-aba="entrega">Na entrega</button>
+  <button class="aba" data-aba="concluidos">Concluídos</button>
+</div>
+
+<div id="aba-novos" class="conteudo-aba ativo">
+  <div class="lista-pedidos" id="listaNovos"></div>
+</div>
+<div id="aba-preparo" class="conteudo-aba">
+  <div class="lista-pedidos" id="listaPreparo"></div>
+</div>
+<div id="aba-entrega" class="conteudo-aba">
+  <div class="lista-pedidos" id="listaEntrega"></div>
+</div>
+<div id="aba-concluidos" class="conteudo-aba">
+  <div class="lista-pedidos" id="listaConcluidos"></div>
+</div>
+
+<!-- Modal confirmação apagar -->
+<div class="modal-bg" id="modalLimpar">
+  <div class="modal">
+    <h3>⚠️ Limpar histórico</h3>
+    <p id="modalTexto">Isso vai apagar permanentemente todos os pedidos do banco de dados. Essa ação não pode ser desfeita.</p>
+    <div class="modal-btns">
+      <button class="btn-cancelar-modal" id="btnCancelarModal">Cancelar</button>
+      <button class="btn-confirmar-apagar" id="btnConfirmarApagar">Apagar tudo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmação apagar 1 pedido -->
+<div class="modal-bg" id="modalApagarUm">
+  <div class="modal">
+    <h3>🗑 Apagar pedido</h3>
+    <p>Esse pedido será removido permanentemente do banco de dados.</p>
+    <div class="modal-btns">
+      <button class="btn-cancelar-modal" id="btnCancelarUm">Cancelar</button>
+      <button class="btn-confirmar-apagar" id="btnConfirmarUm">Apagar</button>
+    </div>
+  </div>
+</div>
+
+<div id="areaImpressao"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot, doc, updateDoc,
+  deleteDoc, getDocs, serverTimestamp, query, orderBy, limit
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+/* ============================================================
+   COLE AS CREDENCIAIS DO FIREBASE AQUI
+   ============================================================ */
+var FB = {
+  apiKey: "AIzaSyChLCz_oV36K-hddzAzDTVYo7WXNKH1fw8",
+  authDomain: "santo-frango-b8deb.firebaseapp.com",
+  projectId: "santo-frango-b8deb",
+  storageBucket: "santo-frango-b8deb.firebasestorage.app",
+  messagingSenderId: "42747726573",
+  appId: "1:42747726573:web:4eee5e05d3095219f09ae4"
+};
+/* ============================================================ */
+
+var app = initializeApp(FB);
+var db = getFirestore(app);
+
+/* ---------- Abas ---------- */
+document.querySelectorAll('.aba').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.aba').forEach(function(b) { b.classList.remove('ativa'); });
+    document.querySelectorAll('.conteudo-aba').forEach(function(c) { c.classList.remove('ativo'); });
+    btn.classList.add('ativa');
+    document.getElementById('aba-' + btn.dataset.aba).classList.add('ativo');
+  });
+});
+
+/* ---------- Som ---------- */
+var somAtivo = false;
+document.getElementById('btnSom').addEventListener('click', function() {
+  somAtivo = !somAtivo;
+  this.textContent = somAtivo ? '🔔 Som: ON' : '🔔 Som: OFF';
+  this.classList.toggle('ativo', somAtivo);
+});
+function tocarSom() {
+  try {
+    var ctx = new AudioContext();
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    o.start(); o.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+/* ---------- Helpers ---------- */
+function R(v) { return "R$ " + (v || 0).toFixed(2).replace('.', ','); }
+function fmtHora(ts) {
+  if (!ts) return '';
+  var d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+function fmtData(ts) {
+  if (!ts) return '';
+  var d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}) + ' ' +
+         d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+function nomeId(id) { return '#' + id.slice(-4).toUpperCase(); }
+
+/* ---------- Render card ---------- */
+function htmlCard(id, p) {
+  var tagClasse = {novo:'tag-novo', preparo:'tag-preparo', entrega:'tag-entrega', concluido:'tag-concluido'}[p.status] || 'tag-novo';
+  var tagLabel  = {novo:'Novo', preparo:'Em preparo', entrega:'Na entrega', concluido:'Concluído'}[p.status] || p.status;
+
+  var adicStr = '';
+  if (p.adicionais && p.adicionais.length) {
+    adicStr = p.adicionais.map(function(a) { return a.qtd + 'x ' + a.nome; }).join(', ');
+  }
+
+  var taxaHtml = '';
+  if (p.taxaGratis) {
+    taxaHtml = '<span class="taxa-riscada">' + R(p.taxaEntrega || 0) + '</span> ' +
+               '<span class="info-val gratis">GRÁTIS</span>';
+  } else {
+    taxaHtml = '<span class="info-val">' + R(p.taxaEntrega || 0) + '</span>';
+  }
+
+  var trocoStr = '';
+  if (p.troco) trocoStr = ' · troco p/ ' + R(p.troco);
+
+  var botoes = '';
+  if (p.status === 'novo') {
+    botoes = '<button class="btn btn-avancar" data-id="' + id + '" data-acao="preparo">Aceitar → Preparo</button>';
+  } else if (p.status === 'preparo') {
+    botoes = '<button class="btn btn-avancar" data-id="' + id + '" data-acao="entrega">Saiu → Entrega</button>';
+  } else if (p.status === 'entrega') {
+    botoes = '<button class="btn btn-concluir" data-id="' + id + '" data-acao="concluido">✓ Entregue</button>';
+  }
+
+  return '<div class="card ' + (p.status === 'novo' ? 'novo' : '') + '" id="card-' + id + '">' +
+    '<div class="card-topo">' +
+      '<span class="num">' + nomeId(id) + '</span>' +
+      '<span class="tag ' + tagClasse + '">' + tagLabel + '</span>' +
+      '<span class="hora">' + fmtData(p.criadoEm) + '</span>' +
+    '</div>' +
+    '<div class="card-corpo">' +
+      '<div class="linha-info"><span class="info-label">Cliente</span><span class="info-val">' + (p.cliente ? p.cliente.nome : '-') + ' · ' + (p.cliente ? p.cliente.telefone : '') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Combo</span><span class="info-val">' + (p.combo ? p.combo.nome : '-') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Molhos</span><span class="info-val">' + (Array.isArray(p.molhos) ? p.molhos.join(', ') : '-') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Bebida</span><span class="info-val">' + (p.bebida ? p.bebida.nome : '-') + '</span></div>' +
+      (adicStr ? '<div class="linha-info"><span class="info-label">Adicionais</span><span class="info-val">' + adicStr + '</span></div>' : '') +
+      '<div class="linha-info"><span class="info-label">Endereço</span><span class="info-val">' + (p.endereco ? p.endereco.bairro + ' · ' + p.endereco.rua + ', ' + p.endereco.numero + (p.endereco.referencia ? ' · ' + p.endereco.referencia : '') : '-') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Taxa entrega</span>' + taxaHtml + '</div>' +
+      '<div class="linha-info"><span class="info-label">Pagamento</span><span class="info-val">' + (p.pagamento || '-') + trocoStr + '</span></div>' +
+      (p.observacoes ? '<div class="linha-info"><span class="info-label">Obs</span><span class="info-val">' + p.observacoes + '</span></div>' : '') +
+      '<div class="linha-info"><span class="info-label">Total</span><span class="info-val destaque">' + R(p.total) + '</span></div>' +
+    '</div>' +
+    '<div class="card-rodape">' +
+      '<button class="btn btn-print" data-id="' + id + '">🖨 Imprimir</button>' +
+      botoes +
+      '<button class="btn btn-apagar" data-id="' + id + '">🗑 Apagar</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ---------- Render listas ---------- */
+var todosOsPedidos = new Map();
+var primeiraVez = true;
+
+function renderTudo() {
+  var grupos = {novo:[], preparo:[], entrega:[], concluido:[]};
+  todosOsPedidos.forEach(function(p, id) {
+    if (grupos[p.status]) grupos[p.status].push([id, p]);
+  });
+
+  var mapa = {novo:'listaNovos', preparo:'listaPreparo', entrega:'listaEntrega', concluido:'listaConcluidos'};
+  var vazios = {novo:'Nenhum pedido novo.', preparo:'Nenhum pedido em preparo.', entrega:'Nenhum pedido na entrega.', concluido:'Nenhum pedido concluído.'};
+
+  Object.keys(grupos).forEach(function(status) {
+    var el = document.getElementById(mapa[status]);
+    var items = grupos[status];
+    if (!items.length) {
+      el.innerHTML = '<div class="vazio">' + vazios[status] + '</div>';
+    } else {
+      el.innerHTML = items.map(function(par) { return htmlCard(par[0], par[1]); }).join('');
+    }
+  });
+
+  var novos = grupos.novo.length;
+  var badge = document.getElementById('badgeNovo');
+  badge.textContent = novos + ' novo(s)';
+  badge.classList.toggle('mostrar', novos > 0);
+
+  // Eventos dos botões
+  document.querySelectorAll('[data-acao]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      avancar(btn.dataset.id, btn.dataset.acao);
+    });
+  });
+  document.querySelectorAll('.btn-print').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var p = todosOsPedidos.get(btn.dataset.id);
+      if (p) imprimir(btn.dataset.id, p);
+    });
+  });
+  document.querySelectorAll('.btn-apagar').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      abrirModalUm(btn.dataset.id);
+    });
+  });
+}
+
+/* ---------- Avancar status ---------- */
+async function avancar(id, novoStatus) {
+  try {
+    await updateDoc(doc(db, 'pedidos', id), { status: novoStatus, atualizadoEm: serverTimestamp() });
+  } catch(e) { alert('Erro ao atualizar: ' + e.message); }
+}
+
+/* ---------- Apagar 1 pedido ---------- */
+var idParaApagar = null;
+function abrirModalUm(id) {
+  idParaApagar = id;
+  document.getElementById('modalApagarUm').classList.add('aberto');
+}
+document.getElementById('btnCancelarUm').addEventListener('click', function() {
+  document.getElementById('modalApagarUm').classList.remove('aberto');
+  idParaApagar = null;
+});
+document.getElementById('btnConfirmarUm').addEventListener('click', async function() {
+  if (!idParaApagar) return;
+  try {
+    await deleteDoc(doc(db, 'pedidos', idParaApagar));
+    todosOsPedidos.delete(idParaApagar);
+    renderTudo();
+  } catch(e) { alert('Erro ao apagar: ' + e.message); }
+  document.getElementById('modalApagarUm').classList.remove('aberto');
+  idParaApagar = null;
+});
+
+/* ---------- Limpar histórico completo ---------- */
+document.getElementById('btnLimparHistorico').addEventListener('click', function() {
+  document.getElementById('modalTexto').textContent =
+    'Isso vai apagar permanentemente TODOS os ' + todosOsPedidos.size + ' pedido(s) do banco de dados. Essa ação não pode ser desfeita.';
+  document.getElementById('modalLimpar').classList.add('aberto');
+});
+document.getElementById('btnCancelarModal').addEventListener('click', function() {
+  document.getElementById('modalLimpar').classList.remove('aberto');
+});
+document.getElementById('btnConfirmarApagar').addEventListener('click', async function() {
+  document.getElementById('btnConfirmarApagar').textContent = 'Apagando...';
+  document.getElementById('btnConfirmarApagar').disabled = true;
+  try {
+    var todos = await getDocs(collection(db, 'pedidos'));
+    var promessas = [];
+    todos.forEach(function(d) {
+      promessas.push(deleteDoc(doc(db, 'pedidos', d.id)));
+    });
+    await Promise.all(promessas);
+    todosOsPedidos.clear();
+    renderTudo();
+  } catch(e) { alert('Erro ao limpar: ' + e.message); }
+  document.getElementById('modalLimpar').classList.remove('aberto');
+  document.getElementById('btnConfirmarApagar').textContent = 'Apagar tudo';
+  document.getElementById('btnConfirmarApagar').disabled = false;
+});
+
+/* ---------- Impressão ---------- */
+function imprimir(id, p) {
+  var adicStr = '';
+  if (p.adicionais && p.adicionais.length) {
+    adicStr = p.adicionais.map(function(a) {
+      return '<div style="display:flex;justify-content:space-between;">' +
+        '<span>' + a.qtd + 'x ' + a.nome + '</span>' +
+        '<span>' + R(a.preco * a.qtd) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+  var taxaTexto = p.taxaGratis
+    ? '<span style="text-decoration:line-through;color:#999;">' + R(p.taxaEntrega) + '</span> GRÁTIS'
+    : R(p.taxaEntrega || 0);
+  var trocoTexto = p.troco
+    ? '<div style="display:flex;justify-content:space-between;"><span>Troco para:</span><span>' + R(p.troco) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>Troco:</span><span>' + R(p.troco - p.total) + '</span></div>'
+    : '';
+  var hora = new Date().toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('areaImpressao').innerHTML =
+    '<div style="font-family:Courier New,monospace;font-size:12px;width:72mm;padding:4mm 3mm;line-height:1.55;color:#000;background:#fff;">' +
+      '<div style="text-align:center;font-size:16px;font-weight:bold;margin-bottom:2px;">SANTO FRANGO 🍗</div>' +
+      '<div style="text-align:center;font-size:10px;margin-bottom:6px;">Cacoal — RO</div>' +
+      '<div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:4px 0;margin:4px 0;display:flex;justify-content:space-between;">' +
+        '<span style="font-weight:bold;">Pedido ' + nomeId(id) + '</span>' +
+        '<span style="font-size:10px;">' + hora + '</span>' +
+      '</div>' +
+      '<div style="margin:6px 0;"><b>CLIENTE</b><br>' + (p.cliente ? p.cliente.nome : '-') + '<br>' + (p.cliente ? p.cliente.telefone : '') + '</div>' +
+      '<div style="border-top:1px dashed #000;padding-top:5px;margin-top:5px;"><b>PEDIDO</b></div>' +
+      '<div style="display:flex;justify-content:space-between;"><span>' + (p.combo ? p.combo.nome : '-') + '</span><span>' + R(p.combo ? p.combo.preco : 0) + '</span></div>' +
+      '<div style="font-size:10px;color:#555;">Molhos: ' + (Array.isArray(p.molhos) ? p.molhos.join(', ') : '-') + '</div>' +
+      (p.bebida && p.bebida.preco ? '<div style="display:flex;justify-content:space-between;"><span>' + p.bebida.nome + '</span><span>' + R(p.bebida.preco) + '</span></div>' : '') +
+      (adicStr ? '<div style="margin-top:4px;font-size:11px;">' + adicStr + '</div>' : '') +
+      (p.observacoes ? '<div style="font-size:10px;border:1px dashed #999;padding:3px;margin-top:4px;">Obs: ' + p.observacoes + '</div>' : '') +
+      '<div style="border-top:1px dashed #000;padding-top:5px;margin-top:6px;"><b>ENTREGA</b><br>' +
+        (p.endereco ? p.endereco.bairro + '<br>' + p.endereco.rua + ', ' + p.endereco.numero + (p.endereco.referencia ? '<br>Ref: ' + p.endereco.referencia : '') : '-') +
+      '</div>' +
+      '<div style="border-top:1px dashed #000;margin-top:6px;padding-top:4px;font-size:11px;">' +
+        '<div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>' + R(p.subtotal) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;"><span>Taxa entrega</span><span>' + taxaTexto + '</span></div>' +
+        '<div style="border-top:1px solid #000;margin-top:3px;padding-top:3px;display:flex;justify-content:space-between;font-size:14px;font-weight:bold;"><span>TOTAL</span><span>' + R(p.total) + '</span></div>' +
+        '<div style="margin-top:4px;">Pagamento: <b>' + (p.pagamento || '-') + '</b></div>' +
+        trocoTexto +
+      '</div>' +
+      '<div style="text-align:center;font-size:10px;margin-top:8px;border-top:1px dashed #000;padding-top:5px;">Obrigado pela preferência! 🍗</div>' +
+    '</div>';
+
+  document.getElementById('areaImpressao').style.display = 'block';
+  window.print();
+  document.getElementById('areaImpressao').style.display = 'none';
+}
+
+/* ---------- Listener em tempo real ---------- */
+var q = query(collection(db, 'pedidos'), orderBy('criadoEm', 'desc'), limit(200));
+onSnapshot(q, function(snap) {
+  var temNovo = false;
+  snap.docChanges().forEach(function(change) {
+    if (!primeiraVez && change.type === 'added' && change.doc.data().status === 'novo') {
+      temNovo = true;
+    }
+    if (change.type === 'removed') {
+      todosOsPedidos.delete(change.doc.id);
+    } else {
+      todosOsPedidos.set(change.doc.id, change.doc.data());
+    }
+  });
+  primeiraVez = false;
+  renderTudo();
+  if (temNovo && somAtivo) tocarSom();
+});
+</script>
+</body>
+</html>
