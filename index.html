@@ -84,9 +84,25 @@ header h1{font-size:17px;font-weight:800;color:var(--dourado);}
 .btn-confirmar-apagar{flex:1;background:var(--brasa);border:none;color:#fff;border-radius:999px;padding:12px;font-family:var(--fc);font-weight:700;font-size:14px;cursor:pointer;}
 
 /* IMPRESSÃO */
+@page{
+  size:58mm auto;
+  margin:0;
+}
 @media print{
+  html, body{
+    width:58mm;
+    margin:0 !important;
+    padding:0 !important;
+    background:#fff !important;
+  }
   body > *{display:none !important;}
-  #areaImpressao{display:block !important;position:static !important;}
+  #areaImpressao{
+    display:block !important;
+    position:static !important;
+    width:58mm;
+    margin:0 !important;
+    padding:0 !important;
+  }
 }
 #areaImpressao{display:none;position:absolute;left:-9999px;}
 </style>
@@ -184,8 +200,11 @@ document.querySelectorAll('.aba').forEach(function(btn) {
 });
 
 /* ---------- Som ---------- */
-var somAtivo = false;
-document.getElementById('btnSom').addEventListener('click', function() {
+var somAtivo = true;
+var btnSom = document.getElementById('btnSom');
+btnSom.textContent = '🔔 Som: ON';
+btnSom.classList.add('ativo');
+btnSom.addEventListener('click', function() {
   somAtivo = !somAtivo;
   this.textContent = somAtivo ? '🔔 Som: ON' : '🔔 Som: OFF';
   this.classList.toggle('ativo', somAtivo);
@@ -256,9 +275,9 @@ function htmlCard(id, p) {
     '</div>' +
     '<div class="card-corpo">' +
       '<div class="linha-info"><span class="info-label">Cliente</span><span class="info-val">' + (p.cliente ? p.cliente.nome : '-') + ' · ' + (p.cliente ? p.cliente.telefone : '') + '</span></div>' +
-      '<div class="linha-info"><span class="info-label">Combo</span><span class="info-val">' + (p.combo ? p.combo.nome : '-') + '</span></div>' +
-      '<div class="linha-info"><span class="info-label">Molhos</span><span class="info-val">' + (Array.isArray(p.molhos) ? p.molhos.join(', ') : '-') + '</span></div>' +
-      '<div class="linha-info"><span class="info-label">Bebida</span><span class="info-val">' + (p.bebida ? p.bebida.nome : '-') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Itens</span><span class="info-val">' + (p.itens && p.itens.length ? p.itens.map(function(i){return i.qtd+'x '+i.nome;}).join(', ') : (p.combo ? p.combo.nome : '-')) + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Molhos</span><span class="info-val">' + (Array.isArray(p.molhos) ? p.molhos.map(function(m){return typeof m==='string'?m:(m.qtd&&m.qtd>1?m.qtd+'x ':'')+m.nome;}).join(', ') : '-') + '</span></div>' +
+      '<div class="linha-info"><span class="info-label">Bebidas</span><span class="info-val">' + (p.bebidas && p.bebidas.length ? p.bebidas.map(function(b){return b.qtd+'x '+b.nome;}).join(', ') : (p.bebida ? p.bebida.nome : '-')) + '</span></div>' +
       (adicStr ? '<div class="linha-info"><span class="info-label">Adicionais</span><span class="info-val">' + adicStr + '</span></div>' : '') +
       '<div class="linha-info"><span class="info-label">Endereço</span><span class="info-val">' + (p.endereco ? p.endereco.bairro + ' · ' + p.endereco.rua + ', ' + p.endereco.numero + (p.endereco.referencia ? ' · ' + p.endereco.referencia : '') : '-') + '</span></div>' +
       '<div class="linha-info"><span class="info-label">Taxa entrega</span>' + taxaHtml + '</div>' +
@@ -397,7 +416,7 @@ function imprimir(id, p) {
   var hora = new Date().toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 
   document.getElementById('areaImpressao').innerHTML =
-    '<div style="font-family:Courier New,monospace;font-size:12px;width:72mm;padding:4mm 3mm;line-height:1.55;color:#000;background:#fff;">' +
+    '<div style="font-family:Courier New,monospace;font-size:11px;width:58mm;box-sizing:border-box;padding:2mm 3mm;line-height:1.5;color:#000;background:#fff;word-wrap:break-word;overflow-wrap:break-word;">' +
       '<div style="text-align:center;font-size:16px;font-weight:bold;margin-bottom:2px;">SANTO FRANGO 🍗</div>' +
       '<div style="text-align:center;font-size:10px;margin-bottom:6px;">Cacoal — RO</div>' +
       '<div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:4px 0;margin:4px 0;display:flex;justify-content:space-between;">' +
@@ -406,18 +425,18 @@ function imprimir(id, p) {
       '</div>' +
       '<div style="margin:6px 0;"><b>CLIENTE</b><br>' + (p.cliente ? p.cliente.nome : '-') + '<br>' + (p.cliente ? p.cliente.telefone : '') + '</div>' +
       '<div style="border-top:1px dashed #000;padding-top:5px;margin-top:5px;"><b>PEDIDO</b></div>' +
-      '<div style="display:flex;justify-content:space-between;"><span>' + (p.combo ? p.combo.nome : '-') + '</span><span>' + R(p.combo ? p.combo.preco : 0) + '</span></div>' +
-      '<div style="font-size:10px;color:#555;">Molhos: ' + (Array.isArray(p.molhos) ? p.molhos.join(', ') : '-') + '</div>' +
-      (p.bebida && p.bebida.preco ? '<div style="display:flex;justify-content:space-between;"><span>' + p.bebida.nome + '</span><span>' + R(p.bebida.preco) + '</span></div>' : '') +
+      (p.itens && p.itens.length ? p.itens.map(function(it){return '<div style="display:flex;justify-content:space-between;gap:6px;"><span>'+it.qtd+'x '+it.nome+'</span><span>'+R(it.subtotal)+'</span></div>';}).join('') : '<div style="display:flex;justify-content:space-between;gap:6px;"><span>'+(p.combo?p.combo.nome:'-')+'</span><span>'+R(p.combo?p.combo.preco:0)+'</span></div>') +
+      '<div style="font-size:10px;color:#555;">Molhos: ' + (Array.isArray(p.molhos) ? p.molhos.map(function(m){return typeof m==='string'?m:(m.qtd&&m.qtd>1?m.qtd+'x ':'')+m.nome;}).join(', ') : '-') + '</div>' +
+      (p.bebida && p.bebida.preco ? '<div style="display:flex;justify-content:space-between;gap:6px;"><span>' + p.bebida.nome + '</span><span>' + R(p.bebida.preco) + '</span></div>' : '') +
       (adicStr ? '<div style="margin-top:4px;font-size:11px;">' + adicStr + '</div>' : '') +
       (p.observacoes ? '<div style="font-size:10px;border:1px dashed #999;padding:3px;margin-top:4px;">Obs: ' + p.observacoes + '</div>' : '') +
       '<div style="border-top:1px dashed #000;padding-top:5px;margin-top:6px;"><b>ENTREGA</b><br>' +
         (p.endereco ? p.endereco.bairro + '<br>' + p.endereco.rua + ', ' + p.endereco.numero + (p.endereco.referencia ? '<br>Ref: ' + p.endereco.referencia : '') : '-') +
       '</div>' +
       '<div style="border-top:1px dashed #000;margin-top:6px;padding-top:4px;font-size:11px;">' +
-        '<div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>' + R(p.subtotal) + '</span></div>' +
-        '<div style="display:flex;justify-content:space-between;"><span>Taxa entrega</span><span>' + taxaTexto + '</span></div>' +
-        '<div style="border-top:1px solid #000;margin-top:3px;padding-top:3px;display:flex;justify-content:space-between;font-size:14px;font-weight:bold;"><span>TOTAL</span><span>' + R(p.total) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:6px;"><span>Subtotal</span><span>' + R(p.subtotal) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:6px;"><span>Taxa entrega</span><span>' + taxaTexto + '</span></div>' +
+        '<div style="border-top:1px solid #000;margin-top:3px;padding-top:3px;display:flex;justify-content:space-between;gap:6px;font-size:14px;font-weight:bold;"><span>TOTAL</span><span>' + R(p.total) + '</span></div>' +
         '<div style="margin-top:4px;">Pagamento: <b>' + (p.pagamento || '-') + '</b></div>' +
         trocoTexto +
       '</div>' +
